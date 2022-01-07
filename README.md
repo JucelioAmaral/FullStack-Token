@@ -14,7 +14,7 @@ Front-End utilizando Angular 12.
 
 ## Como baixar o código
 
-git clone https://github.com/JucelioAmaral/FullStack.git
+git clone https://github.com/JucelioAmaral/FullStack-Token.git
 
 ## Como configurar a api(Back end)?
 
@@ -34,3 +34,4 @@ git clone https://github.com/JucelioAmaral/FullStack.git
 2. Instalar o Angular versão mais nova usando o comando: npm install -g @angular/cli;
 3. Execute ao comando: npm start ou ng serve -o;
 4. Acesso a página Angula: http://localhost:4200/
+
