@@ -60,9 +60,13 @@ namespace ProEventos.API.Controllers
                 if (await _accountService.UserExists(userDto.UserName))
                     return BadRequest("Usuário já cadastrado");
 
-                var user = _accountService.createAccountAsync(userDto);
+                var user = await _accountService.createAccountAsync(userDto);
                 if (user != null)
-                    return Ok(user);
+                    return Ok(new {
+                        userName = user.UserName,
+                        PrimeiroNome = user.PrimeiroNome,
+                        TokenContext = _tokenService.CreateToken(user).Result
+                    });
 
                 return BadRequest("Usuário não cadastrado. Erro desconhecido");
             }
