@@ -106,13 +106,21 @@ namespace ProEventos.API.Controllers
         {
             try
             {
+                if (userUpdateDto.UserName != User.GetUserName())
+                    return Unauthorized("Usuário inválido.");
+
                 var user = await _accountService.getUserByUserNameAsync(User.GetUserName());//Esse "User" é um objeto da classe "ClaimsPrincipal" que pertence a classe nativa "ControllerBase". Dessa forma é possível criar métodos de extensão.
                 if (user == null) return Unauthorized("Usuário inválido.");
 
-                var userReturn = _accountService.UpdateAccountAsync(userUpdateDto);
+                var userReturn = await _accountService.UpdateAccountAsync(userUpdateDto);
                 if (userReturn == null) return NoContent();
 
-                return Ok(userReturn);
+                return Ok(new
+                {
+                    userName = userReturn.UserName,
+                    PrimeiroNome = userReturn.PrimeiroNome,
+                    TokenContext = _tokenService.CreateToken(userReturn).Result
+                });
             }
             catch (Exception ex)
             {
