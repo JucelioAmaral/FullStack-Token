@@ -3,6 +3,7 @@ using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 using ProEventos.Domain;
 using ProEventos.Persistence.Contratos;
+using ProEventos.Persistence.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -85,35 +86,22 @@ namespace ProEventos.Application
             }
         }
 
-        public async Task<EventoDto[]> GetAllEventosAsync(int userId, bool includePalestrante = false)
+        public async Task<PageList<EventoDto>> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrante = false)
         {
             try
             {
-                var eventos = await _eventoPersist.GetAllEventosAsync(userId, includePalestrante);
+                var eventos = await _eventoPersist.GetAllEventosAsync(userId, pageParams, includePalestrante);
                 if (eventos == null) return null;
 
                 //LE-SE: Eu quero mapear meu "evento" (var evento acima), dado meu objeto "EventoDto"
                 //LE-SE TBM: Dado meu objeto "EventoDto" vou mapear meu "evento" (var "evento" acima), que é o retorno do meu repositório e atribuir ao "resultado" para retornar.
-                var resultado = _mapper.Map<EventoDto[]>(eventos);
+                var resultado = _mapper.Map<PageList<EventoDto>>(eventos);
 
-                return resultado;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<EventoDto[]> GetAllEventosByTemaAsync(int userId, string tema, bool includePalestrante = false)
-        {
-            try
-            {
-                var eventos = await _eventoPersist.GetAllEventosByTemaAsync(userId, tema, includePalestrante);
-                if (eventos == null) return null;
-
-                //LE-SE: Eu quero mapear meu "evento" (var evento acima), dado meu objeto "EventoDto"
-                //LE-SE TBM: Dado meu objeto "EventoDto" vou mapear meu "evento" (var "evento" acima), que é o retorno do meu repositório e atribuir ao "resultado" para retornar.
-                var resultado = _mapper.Map<EventoDto[]>(eventos);
+                // Mapeamento teve que ser feito na mão
+                resultado.CurrentPage = eventos.CurrentPage;
+                resultado.TotalPages = eventos.TotalPages;
+                resultado.PageSize = eventos.PageSize;
+                resultado.TotalCount = eventos.TotalCount;
 
                 return resultado;
             }

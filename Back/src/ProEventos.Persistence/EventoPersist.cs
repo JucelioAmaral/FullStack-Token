@@ -4,6 +4,7 @@ using ProEventos.Persistence.Contratos;
 using ProEventos.Persistence.Contextos;
 using System.Threading.Tasks;
 using ProEventos.Domain;
+using ProEventos.Persistence.Models;
 
 namespace ProEventos.Persistence
 {
@@ -17,7 +18,7 @@ namespace ProEventos.Persistence
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-        public async Task<Evento[]> GetAllEventosAsync(int userId, bool includePalestrante = false)
+        public async Task<PageList<Evento>> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrante = false)
         {
             IQueryable<Evento> query = _context.tblEventos //LE-SE: Para cada evento na tabela Evento, inclui os lotes e as redes sociais.
             .Include(e => e.Lotes)
@@ -31,27 +32,12 @@ namespace ProEventos.Persistence
             }
 
             query = query.AsNoTracking()
-                         .Where(e => e.Id == userId)
+                         .Where(e => e.Tema.ToLower().Contains(pageParams.Term.ToLower()) && e.UserId == userId)
                          .OrderBy(e => e.Id);// Ordenado por Id.
-            return await query.ToArrayAsync();
-        }
-        public async Task<Evento[]> GetAllEventosByTemaAsync(int userId, string tema, bool includePalestrante = false)
-        {
-            IQueryable<Evento> query = _context.tblEventos
-            .Include(e => e.Lotes)
-            .Include(e => e.RedesSociais);
 
-            if(includePalestrante)
-            {
-                query = query
-                .Include(pe => pe.PalestrantesEventos)
-                .ThenInclude(pe => pe.Palestrante);
-            }
-
-            query = query.AsNoTracking().OrderBy(e => e.Id)
-                                        .Where(e => e.Tema.ToLower().Contains(tema.ToLower()) && e.Id == userId);
-            return await query.ToArrayAsync();
+            return await PageList<Evento>.CreateAsync(query, pageParams.PageNumber, pageParams.PageSize);
         }
+
         public async Task<Evento> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrante = false)
         {
             IQueryable<Evento> query = _context.tblEventos
@@ -67,6 +53,7 @@ namespace ProEventos.Persistence
 
             query = query.AsNoTracking().OrderBy(e => e.Id)
                                         .Where(e => e.Id == eventoId && e.Id == userId);
+
             return await query.FirstOrDefaultAsync();
         }       
     }
