@@ -14,7 +14,7 @@ using ProEventos.Application.Dtos;
 namespace ProEventos.API.Controllers
 {
     [Authorize]
-    [ApiController]
+    [ApiController]// O atributo ApiController permite acionar automaticamente erros de validação para uma reposta HTTP 400. O envio de uma requisição com dados inválidos trará como retorno um erro do tipo 400.
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
@@ -38,7 +38,7 @@ namespace ProEventos.API.Controllers
         {
             try
             {
-                var userName = User.GetUserName();
+                var userName = User.GetUserName();//Esse "User" é um objeto da classe "ClaimsPrincipal" que pertence a classe nativa "ControllerBase". Dessa forma é possível criar métodos de extensão.
                 var user = await _accountService.GetUserByUserNameAsync(userName);
                 return Ok(user);
             }
@@ -107,7 +107,7 @@ namespace ProEventos.API.Controllers
         {
             try
             {
-                if (userUpdateDto.UserName != User.GetUserName())
+                if (userUpdateDto.UserName != User.GetUserName())//Esse "User" é um objeto da classe "ClaimsPrincipal" que pertence a classe nativa "ControllerBase". Dessa forma é possível criar métodos de extensão.
                     return Unauthorized("Usuário Inválido");
 
                 var user = await _accountService.GetUserByUserNameAsync(User.GetUserName());

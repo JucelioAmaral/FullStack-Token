@@ -18,7 +18,7 @@ namespace ProEventos.Api.Helpers
         public async Task<string> SaveImage(IFormFile imageFile, string destino)
         {
             string imageName = new String(Path.GetFileNameWithoutExtension(imageFile.FileName)
-                                              .Take(10)
+                                              .Take(10)// pega os 10 primeiros (TOP) caracteres do nome da imagem/arquivo.
                                               .ToArray()
                                          ).Replace(' ', '-');
 

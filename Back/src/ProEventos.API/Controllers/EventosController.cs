@@ -14,8 +14,8 @@ using ProEventos.Api.Helpers;
 
 namespace ProEventos.API.Controllers
 {
-    [Authorize]
-    [ApiController]
+    [Authorize]//Serve para definir que precisa estar autorizado, ou seja, com o token
+    [ApiController]// O atributo ApiController permite acionar automaticamente erros de validação para uma reposta HTTP 400. O envio de uma requisição com dados inválidos trará como retorno um erro do tipo 400.
     [Route("api/[controller]")]
     public class EventosController : ControllerBase
     {
@@ -78,7 +78,7 @@ namespace ProEventos.API.Controllers
                 var evento = await _eventoService.GetEventoByIdAsync(User.GetUserId(), eventoId, true);
                 if (evento == null) return NoContent();
 
-                var file = Request.Form.Files[0];
+                var file = Request.Form.Files[0];// Esse "Request" é o mesmo request que chega pelo [HttpPost("upload-image/{EventoId}")]
                 if (file.Length > 0)
                 {
                     _util.DeleteImage(evento.ImagemURL, _destino);

@@ -100,7 +100,7 @@ namespace ProEventos.Application
 
                 _userPersist.Update<User>(user);
 
-                if (await _userPersist.SaveChangesAsync())
+                if (await _userPersist.SaveChangesAsync())//pega o token e envia para o usuário após reset da senha.
                 {
                     var userRetorno = await _userPersist.GetUserByUserNameAsync(user.UserName);
 

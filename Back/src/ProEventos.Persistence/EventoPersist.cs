@@ -19,14 +19,14 @@ namespace ProEventos.Persistence
 
         public async Task<PageList<Evento>> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrantes = false)
         {
-            IQueryable<Evento> query = _context.tblEventos
+            IQueryable<Evento> query = _context.tblEventos//LE-SE: Para cada evento na tabela Evento, inclui os lotes e as redes sociais.
                 .Include(e => e.Lotes)
                 .Include(e => e.RedesSociais);
 
-            if (includePalestrantes)
+            if (includePalestrantes)// se "includePalestrante" for verdadeiro, inclui também, na query, o palestranteEvento e inclui o palestrante.
             {
                 query = query
-                    .Include(e => e.PalestrantesEventos)
+                    .Include(e => e.PalestrantesEventos)// Include = Inclui. Ou seja, são SELECT's.
                     .ThenInclude(pe => pe.Palestrante);
             }
 
@@ -34,7 +34,7 @@ namespace ProEventos.Persistence
                          .Where(e => (e.Tema.ToLower().Contains(pageParams.Term.ToLower()) ||
                                       e.Local.ToLower().Contains(pageParams.Term.ToLower())) &&
                                      e.UserId == userId)
-                         .OrderBy(e => e.Id);
+                         .OrderBy(e => e.Id);// Ordenado por Id.
 
             return await PageList<Evento>.CreateAsync(query, pageParams.PageNumber, pageParams.pageSize);
         }

@@ -20,7 +20,7 @@ namespace ProEventos.Persistence
 
         public async Task<IEnumerable<User>> GetUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users.ToListAsync();// Esse "Users" não é uma tabela do Banco de dados, ele é do IdentityDbContext.
         }
 
         public async Task<User> GetUserByIdAsync(int id)

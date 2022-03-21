@@ -23,12 +23,17 @@ namespace ProEventos.Application
             _lotePersist = lotePersist;
             _mapper = mapper;
         }
-
+        /// <summary>
+        /// Adiciona os lotes caso seja um lote novo.
+        /// </summary>
+        /// <param name="eventoId"></param>
+        /// <param name="model"></param>
+        /// <returns>É um void, ou seja, não precisa de retorno, ou seja, não precisa de informar o objeto dentro do sinal de maior e menor</returns>
         public async Task AddLote(int eventoId, LoteDto model)
         {
             try
             {
-                var lote = _mapper.Map<Lote>(model);
+                var lote = _mapper.Map<Lote>(model);//LE-SE: Vai pegar o "model" que é um "Dto", vai mapear ele para um "Lote" e atribuir a variável "var lote".
                 lote.EventoId = eventoId;
 
                 _geralPersist.Add<Lote>(lote);
@@ -52,17 +57,16 @@ namespace ProEventos.Application
                 {
                     if (model.Id == 0)
                     {
+                        //Código para inserir caso seja um lote novo.
                         await AddLote(eventoId, model);
                     }
                     else
                     {
+                        //Código para atualizar caso seja um lote existente.
                         var lote = lotes.FirstOrDefault(lote => lote.Id == model.Id);
                         model.EventoId = eventoId;
-
                         _mapper.Map(model, lote);
-
                         _geralPersist.Update<Lote>(lote);
-
                         await _geralPersist.SaveChangesAsync();
                     }
                 }
@@ -99,7 +103,8 @@ namespace ProEventos.Application
             {
                 var lotes = await _lotePersist.GetLotesByEventoIdAsync(eventoId);
                 if (lotes == null) return null;
-
+                //LE-SE: Eu quero mapear meu "evento" (var evento acima), dado meu objeto "EventoDto"
+                //LE-SE TBM: Dado meu objeto "EventoDto" vou mapear meu "evento" (var "evento" acima), que é o retorno do meu repositório e atribuir ao "resultado" para retornar.
                 var resultado = _mapper.Map<LoteDto[]>(lotes);
 
                 return resultado;
@@ -116,7 +121,8 @@ namespace ProEventos.Application
             {
                 var lote = await _lotePersist.GetLoteByIdsAsync(eventoId, loteId);
                 if (lote == null) return null;
-
+                //LE-SE: Eu quero mapear meu "evento" (var evento acima), dado meu objeto "EventoDto"
+                //LE-SE TBM: Dado meu objeto "EventoDto" vou mapear meu "evento" (var "evento" acima), que é o retorno do meu repositório e atribuir ao "resultado" para retornar.
                 var resultado = _mapper.Map<LoteDto>(lote);
 
                 return resultado;

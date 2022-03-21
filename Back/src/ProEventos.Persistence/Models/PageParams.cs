@@ -7,9 +7,9 @@ namespace ProEventos.Persistence.Models
 {
     public class PageParams
     {
-        public const int MaxPageSize = 50;
+        public const int MaxPageSize = 50; // Itens por página. Pode aumentar ou diminuir se quiser.
         public int PageNumber { get; set; } = 1;
-        public int pageSize = 10;
+        public int pageSize = 10; //Número máximo de páginas. Pode aumentar ou diminuir se quiser.
         public int PageSize
         {
             get { return pageSize; }

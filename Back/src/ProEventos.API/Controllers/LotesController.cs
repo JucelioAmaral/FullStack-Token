@@ -7,7 +7,7 @@ using ProEventos.Application.Dtos;
 
 namespace ProEventos.API.Controllers
 {
-    [ApiController]
+    [ApiController]// O atributo ApiController permite acionar automaticamente erros de validação para uma reposta HTTP 400. O envio de uma requisição com dados inválidos trará como retorno um erro do tipo 400.
     [Route("api/[controller]")]
     public class LotesController : ControllerBase
     {

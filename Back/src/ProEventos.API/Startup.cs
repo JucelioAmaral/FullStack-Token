@@ -44,11 +44,11 @@ namespace ProEventos.API
 
             services.AddIdentityCore<User>(options =>
             {
-                options.Password.RequireDigit = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 4;
+                options.Password.RequireDigit = false;// Requer que a senha tenha digito. Nesse caso colocamos = false.
+                options.Password.RequireNonAlphanumeric = false;// Requer que a senha tenha Alphanumeric. Nesse caso colocamos = false.
+                options.Password.RequireLowercase = false;// Requer que a senha tenha Lowercase . Nesse caso colocamos = false.
+                options.Password.RequireUppercase = false;// Requer que a senha tenha Uppercase. Nesse caso colocamos = false. 
+                options.Password.RequiredLength = 4;// Requer que a senha tenha no mínimo 4 digitos. Nesse caso colocamos = 4.
             })
             .AddRoles<Role>()
             .AddRoleManager<RoleManager<Role>>()
@@ -57,13 +57,14 @@ namespace ProEventos.API
             .AddEntityFrameworkStores<ProEventosContext>()
             .AddDefaultTokenProviders();
 
+            //Faz a autenticação com a chave registrada no "AppSettings:ChaveToken", no arquivo "appsettings.Development.json"
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                     {
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuerSigningKey = true,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"])),
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"])),//Aqui descriptografa a senha, usando a mesma chave.
                             ValidateIssuer = false,
                             ValidateAudience = false
                         };
@@ -77,6 +78,7 @@ namespace ProEventos.API
                         Newtonsoft.Json.ReferenceLoopHandling.Ignore
                     );
 
+            //LE-SE: Dentro do meu domínio da minha aplicação (AppDomain), no domínio corrente (CurrentDomain), procura para mim que está em "Profile" (na pasta "Helpers")
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IEventoService, EventoService>();
@@ -98,10 +100,12 @@ namespace ProEventos.API
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "ProEventos.API", Version = "v1" });
+
+                //Adiciona o botão "Authorize" no swagger
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = @"JWT Authorization header usando Bearer.
-                                Entre com 'Bearer ' [espaço] então coloque seu token.
+                                Entre com 'Bearer ' [espaço] então coloque seu token que, pegará após fazer login com seu usuário e senha.
                                 Exemplo: 'Bearer 12345abcdef'",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
@@ -109,6 +113,7 @@ namespace ProEventos.API
                     Scheme = "Bearer"
                 });
 
+                //Complemento da autenticação do botão "Authorize" no swagger
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement()
                 {
                     {
@@ -143,12 +148,12 @@ namespace ProEventos.API
 
             app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            app.UseAuthentication(); //Informa que terá que ter autenticação.
+            app.UseAuthorization(); // Depois vc autoriza entrar com a autenticação (com o crachá).
 
-            app.UseCors(x => x.AllowAnyHeader()
-                              .AllowAnyMethod()
-                              .AllowAnyOrigin());
+            app.UseCors(x => x.AllowAnyHeader()//LE-SE: Dado qq cabeçalho de requisição do meu http
+                              .AllowAnyMethod()// vinda de qq método, ou seja, get ,post, put, delete, patch...
+                              .AllowAnyOrigin());// vinda de qq origem.
 
             app.UseStaticFiles(new StaticFileOptions()
             {
