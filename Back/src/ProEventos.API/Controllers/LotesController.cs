@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProEventos.Application.Contratos;
+using Microsoft.AspNetCore.Http;
 using ProEventos.Application.Dtos;
-using ProEventos.Domain;
 
 namespace ProEventos.API.Controllers
 {
-    [ApiController]// O atributo ApiController permite acionar automaticamente erros de validação para uma reposta HTTP 400. O envio de uma requisição com dados inválidos trará como retorno um erro do tipo 400.
+    [ApiController]
     [Route("api/[controller]")]
     public class LotesController : ControllerBase
     {
         private readonly ILoteService _loteService;
 
-        public LotesController(ILoteService loteService)
+        public LotesController(ILoteService LoteService)
         {
-            _loteService = loteService;
+            _loteService = LoteService;
         }
 
         [HttpGet("{eventoId}")]
@@ -42,14 +41,14 @@ namespace ProEventos.API.Controllers
             try
             {
                 var lotes = await _loteService.SaveLotes(eventoId, models);
-                if (lotes == null) return BadRequest("Erro ao tentar atualizar os eventos.");
+                if (lotes == null) return NoContent();
 
                 return Ok(lotes);
             }
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Put: Erro ao tentar salvar lotes. Erro: {ex.Message}");
+                    $"Erro ao tentar salvar lotes. Erro: {ex.Message}");
             }
         }
 
@@ -62,13 +61,13 @@ namespace ProEventos.API.Controllers
                 if (lote == null) return NoContent();
 
                 return await _loteService.DeleteLote(lote.EventoId, lote.Id) 
-                       ? Ok(new {message ="Lote Deletado"}) 
-                       : BadRequest("Evento não deletado por motivo desconhecido.");
+                       ? Ok(new { message = "Lote Deletado" }) 
+                       : throw new Exception("Ocorreu um problem não específico ao tentar deletar Lote.");
             }
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Delete: Erro ao tentar deletar lotes. Erro: {ex.Message}");
+                    $"Erro ao tentar deletar lotes. Erro: {ex.Message}");
             }
         }
     }

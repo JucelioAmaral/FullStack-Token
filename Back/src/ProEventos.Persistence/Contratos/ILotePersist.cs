@@ -1,24 +1,23 @@
 using System.Threading.Tasks;
-using ProEventos.Domain; 
+using ProEventos.Domain;
 
 namespace ProEventos.Persistence.Contratos
 {
     public interface ILotePersist
     {
-        //lotes        
+        /// <summary>
+        /// M√©todo get que retornar√° uma lista de lotes por eventoId. 
+        /// </summary>
+        /// <param name="eventoId">C√≥digo chave da tabela Evento</param>
+        /// <returns>Array de Lotes</returns>
+        Task<Lote[]> GetLotesByEventoIdAsync(int eventoId);
 
         /// <summary>
-        /// MÈtodo que retornar· uma lista de Eventos por eventoId.
+        /// M√©todo get que retornar√° apenas 1 Lote
         /// </summary>
-        /// <param name="eventoId">CÛdigo chave da tabela Evento</param>
-        /// <returns>Array de lotes</returns>
-        Task<Lote[]> GetLotesByEventoIdAsync(int eventoId);
-        /// <summary>
-        /// MÈtodo que retornar· apenas 1 lote.
-        /// </summary>
-        /// <param name="eventoId">CÛdigo chave da tabela Evento</param>
-        /// <param name="loteId">CÛdigo chave do meu lote</param>
+        /// <param name="eventoId">C√≥digo chave da tabela Evento</param>
+        /// <param name="id">C√≥digo chave da tabela Lote</param>
         /// <returns>Apenas 1 lote</returns>
-        Task<Lote> GetLoteByIdsAsync(int eventoId, int loteId);
+        Task<Lote> GetLoteByIdsAsync(int eventoId, int id);
     }
 }

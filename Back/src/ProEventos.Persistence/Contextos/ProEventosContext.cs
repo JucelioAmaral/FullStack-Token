@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -7,13 +6,12 @@ using ProEventos.Domain.Identity;
 
 namespace ProEventos.Persistence.Contextos
 {
-    public class ProEventosContext : IdentityDbContext<User, Role, int,
-                                                       IdentityUserClaim<int>,UserRole, IdentityUserLogin<int>,
+    public class ProEventosContext : IdentityDbContext<User, Role, int, 
+                                                       IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, 
                                                        IdentityRoleClaim<int>, IdentityUserToken<int>>
-    // Todos esses parametros do "IdentityDbContext" são dessa classe e precisam ser
-    // passados para realizar a autenticação e o uso do Token. basta clicar com CTRL + click
     {
-        public ProEventosContext(DbContextOptions<ProEventosContext> options) : base(options){ }
+        public ProEventosContext(DbContextOptions<ProEventosContext> options) 
+            : base(options) { }
         public DbSet<Evento> tblEventos { get; set; }
         public DbSet<Lote> tblLotes { get; set; }
         public DbSet<Palestrante> tblPalestrantes { get; set; }
@@ -22,27 +20,26 @@ namespace ProEventos.Persistence.Contextos
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Para autenticação do usuário que logar
-            base.OnModelCreating(modelBuilder);// precisar passar o modelBuilder porque ele precisa ser configurado conforme abaixo.
-            modelBuilder.Entity<UserRole>(userRole =>
-            {
-                userRole.HasKey(ur => new { ur.UserId, ur.RoleId }); // Cria uma relacionamento entre o UserId e RoleId, ou seja, um relacionamento N:N.
+            base.OnModelCreating(modelBuilder);
 
-                userRole.HasOne(ur => ur.Role)
-                .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.RoleId)
-                .IsRequired();
+            modelBuilder.Entity<UserRole>(userRole => 
+                {
+                    userRole.HasKey(ur => new { ur.UserId, ur.RoleId});
 
-                //Sentido inverso.
-                userRole.HasOne(ur => ur.User)
-                .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.UserId)
-                .IsRequired();
-            });
+                    userRole.HasOne(ur => ur.Role)
+                        .WithMany(r => r.UserRoles)
+                        .HasForeignKey(ur => ur.RoleId)
+                        .IsRequired();
 
-            // Para relacionamento entre as tabelas
+                    userRole.HasOne(ur => ur.User)
+                        .WithMany(r => r.UserRoles)
+                        .HasForeignKey(ur => ur.UserId)
+                        .IsRequired();
+                }
+            );
+
             modelBuilder.Entity<PalestranteEvento>()
-            .HasKey(PE => new {PE.EventoId, PE.PalestranteId});
+                .HasKey(PE => new {PE.EventoId, PE.PalestranteId});
 
             modelBuilder.Entity<Evento>()
                 .HasMany(e => e.RedesSociais)
@@ -50,9 +47,9 @@ namespace ProEventos.Persistence.Contextos
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Palestrante>()
-                        .HasMany(e => e.RedesSociais)
-                        .WithOne(rs => rs.Palestrante)
-                        .OnDelete(DeleteBehavior.Cascade);
+                .HasMany(e => e.RedesSociais)
+                .WithOne(rs => rs.Palestrante)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

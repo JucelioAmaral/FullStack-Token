@@ -1,17 +1,19 @@
-﻿using System.Security.Claims;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace ProEventos.API.Extensions
 {
-    //Todo classe de extensão deve ser static, senão não conseguirá chamar ele.
     public static class ClaimsPrincipalExtensions
     {
-        //Todo método de extensão deve ser static, senão não conseguirá chamar ele.
-        public static string GetUserName(this ClaimsPrincipal user)//O nome do método não tem nenhuma relação com o nome da classe, tem a ver com o primeiro parâmetro passado, ou seja, deve ser: "this ClaimsPrincipal <parametro>", funcionando de forma correta.
+        public static string GetUserName(this ClaimsPrincipal user)
         {
             return user.FindFirst(ClaimTypes.Name)?.Value;
         }
-        //Todo método de extensão deve ser static, senão não conseguirá chamar ele.
-        public static int GetUserId(this ClaimsPrincipal user)//O nome do método não tem nenhuma relação com o nome da classe, tem a ver com o primeiro parâmetro passado, ou seja, deve ser: "this ClaimsPrincipal <parametro>", funcionando de forma correta.
+
+        public static int GetUserId(this ClaimsPrincipal user)
         {
             return int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         }

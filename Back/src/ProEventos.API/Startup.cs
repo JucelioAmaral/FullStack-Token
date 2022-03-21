@@ -15,15 +15,14 @@ using System;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using System.Text.Json.Serialization;
 using ProEventos.Domain.Identity;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Collections.Generic;
+using ProEventos.Api.Helpers;
 
 namespace ProEventos.API
 {
@@ -40,84 +39,76 @@ namespace ProEventos.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ProEventosContext>(
-                context => context.UseSqlServer(Configuration.GetConnectionString("Default"))
+                context => context.UseSqlite(Configuration.GetConnectionString("Default"))
             );
 
             services.AddIdentityCore<User>(options =>
             {
-                options.Password.RequireDigit = false;// Requer que a senha tenha digito. Nesse caso colocamos = false.
-                options.Password.RequireNonAlphanumeric = false;// Requer que a senha tenha Alphanumeric. Nesse caso colocamos = false.
-                options.Password.RequireLowercase = false;// Requer que a senha tenha Lowercase . Nesse caso colocamos = false.
-                options.Password.RequireUppercase = false;// Requer que a senha tenha Uppercase. Nesse caso colocamos = false.                
-                options.Password.RequiredLength = 4;// Requer que a senha tenha no mínimo 4 digitos. Nesse caso colocamos = 4.
+                options.Password.RequireDigit = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 4;
             })
             .AddRoles<Role>()
-            .AddEntityFrameworkStores<ProEventosContext>()
-            .AddRoleValidator<RoleValidator<Role>>()
             .AddRoleManager<RoleManager<Role>>()
             .AddSignInManager<SignInManager<User>>()
+            .AddRoleValidator<RoleValidator<Role>>()
+            .AddEntityFrameworkStores<ProEventosContext>()
             .AddDefaultTokenProviders();
 
-            //Faz a autenticação com a chave registrada no "AppSettings:ChaveToken", no arquivo "appsettings.Development.json"
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                     {
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuerSigningKey = true,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                                .GetBytes(Configuration.GetSection("AppSettings:ChaveToken").Value)),//Aqui descriptografa a senha, usando a mesma chave.
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"])),
                             ValidateIssuer = false,
                             ValidateAudience = false
                         };
-                    }
-            );
+                    });
 
-            ////LE-SE: Toda vez que chamar uma controler/uma rota...
-            ////Toda vez que chamar uma controler/uma rota vai requerer que o usuário esteja autenticado automaticamente.
-            //services.AddMvc(options =>
-            //{
-            //    var policy = new AuthorizationPolicyBuilder()
-            //    .RequireAuthenticatedUser()
-            //    .Build();
-            //    options.Filters.Add(new AuthorizeFilter(policy));
-            //});
-
-            //Controla a redundancia do retorno da serialização dos itens.
             services.AddControllers()
-                    .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))// Converte o Enum(palavra) no número e vice vérsa.
-                    .AddNewtonsoftJson(opt => { opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;});
+                    .AddJsonOptions(options =>
+                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
+                    )
+                    .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling =
+                        Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                    );
 
-            //LE-SE: Dentro do meu dom�nio da minha aplica��o (AppDomain), no dom�nio corrente (CurrentDomain), procura para mim que est�erando de "Profile" (na pasta "Helpers")
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IEventoService, EventoService>();
             services.AddScoped<ILoteService, LoteService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IPalestranteService, PalestranteService>();
+            services.AddScoped<IRedeSocialService, RedeSocialService>();
+            services.AddScoped<IUtil, Util>();
 
             services.AddScoped<IGeralPersist, GeralPersist>();
             services.AddScoped<IEventoPersist, EventoPersist>();
             services.AddScoped<ILotePersist, LotePersist>();
             services.AddScoped<IUserPersist, UserPersist>();
+            services.AddScoped<IPalestrantePersist, PalestrantePersist>();
+            services.AddScoped<IRedeSocialPersist, RedeSocialPersist>();
 
             services.AddCors();
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "ProEventos.API", Version = "v1" });
-
-                //Adiciona o botão "Authorize" no swagger
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = @"JWT Authorization header usando Bearer.
-                                Entre com 'Bearer ' [espaço] então coloque seu token que, pegará após fazer login com seu usuário e senha.
+                                Entre com 'Bearer ' [espaço] então coloque seu token.
                                 Exemplo: 'Bearer 12345abcdef'",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer"
                 });
-                //Complemento da autenticação do botão "Authorize" no swagger
+
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement()
                 {
                     {
@@ -148,24 +139,22 @@ namespace ProEventos.API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProEventos.API v1"));
             }
 
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(),"Resources")),
-                RequestPath = new PathString("/Resources")
-            });
-            
-            app.UseAuthentication(); //Informa que terá que ter autenticação.
-
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
-            app.UseAuthentication();// Primeiro vc autentica (dá o crachá)
-            app.UseAuthorization();// Depois vc autoriza entrar com a autenticação (com o crachá).
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-            app.UseCors(cors => cors.AllowAnyHeader()//LE-SE: Dado qq cabeçalho de requisição do meu http
-                                    .AllowAnyMethod()// vinda de qq método, ou seja, get ,post, put, delete, patch...
-                                    .AllowAnyOrigin());// vinda de qq origem.
+            app.UseCors(x => x.AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowAnyOrigin());
+
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Resources")),
+                RequestPath = new PathString("/Resources")
+            });
 
             app.UseEndpoints(endpoints =>
             {
