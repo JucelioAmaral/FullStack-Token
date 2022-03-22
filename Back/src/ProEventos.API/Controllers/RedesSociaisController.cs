@@ -151,7 +151,7 @@ namespace ProEventos.API.Controllers
             }
         }
 
-        [NonAction]
+        [NonAction]// Método interno da classe RedeSociaisController
         private async Task<bool> AutorEvento(int eventoId)
         {
             var evento = await _eventoService.GetEventoByIdAsync(User.GetUserId(), eventoId, false);
