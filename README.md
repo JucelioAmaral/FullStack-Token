@@ -24,7 +24,8 @@ git clone https://github.com/JucelioAmaral/FullStack-Token.git
 4. Abrir o Console/Terminal do Visual Code e entrar no diretório da api(...\Back\src). Pelo Visual Studio, basta abrir o Package Manager Console, alterar o "Default project" (que fica na parte superior do console) para o Class Library que encontra-se os arquivos de persistência;
 5. Executar o comando: "dotnet ef migrations add Initial -p ProEventos.Persistence -s ProEventos.Api";
 6. Executar o comando: "dotnet ef database update -s ProEventos.Api";
-7. Executar a API pelo Visual Code usando o comando: dotnet watch run;
+7. Criar as pastas: Resources, Images e Perfil, conforme a print "Para salvar imagens dos perfis.png";
+8. Executar a API pelo Visual Code usando o comando: dotnet watch run.
 
 **API roda na porta 5001 e pode ser testada pelo link: https://localhost:5001/swagger/index.html**
 
